@@ -1,0 +1,15 @@
+{
+  "model": "XGBoost (extended lags)",
+  "features": "u1-u7 + lags [1, 2, 3, 5, 7, 10, 15, 20, 25, 30]",
+  "n_features": 77,
+  "hyperparameters": {
+    "max_depth": 4,
+    "learning_rate": 0.1,
+    "subsample": 0.7,
+    "min_child_weight": 10,
+    "n_estimators": 13
+  },
+  "test_rmse": 0.13065166438780024,
+  "test_mae": 0.1098439056127185,
+  "test_r2": 0.5190489862415195
+}

@@ -1,0 +1,16 @@
+{
+  "model": "XGBoost",
+  "features": "lagged u1-u7 (lags [1, 2, 3, 5, 7, 10])",
+  "hyperparameters": {
+    "max_depth": 4,
+    "learning_rate": 0.1,
+    "subsample": 0.7,
+    "min_child_weight": 10,
+    "n_estimators": 13
+  },
+  "cv_mean_rmse": 0.119094908620997,
+  "cv_std_rmse": 0.04600145274317272,
+  "test_rmse": 0.15154946783491835,
+  "test_mae": 0.12691431363578487,
+  "test_r2": 0.3544569501040854
+}
