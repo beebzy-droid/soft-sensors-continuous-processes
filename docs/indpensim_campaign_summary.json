@@ -1,0 +1,11 @@
+{
+  "simulator": "Custom Monod + Luedeking-Piret fed-batch fermentation",
+  "inspired_by": "IndPenSim (Goldrick et al. 2015, 2019)",
+  "n_batches": 40,
+  "duration_per_batch_h": 200,
+  "samples_per_batch": 401,
+  "total_samples": 16040,
+  "final_penicillin_mean": 8.43637452040004,
+  "final_penicillin_std": 1.5537017866671379,
+  "final_penicillin_cv_pct": 18.416700004369456
+}
