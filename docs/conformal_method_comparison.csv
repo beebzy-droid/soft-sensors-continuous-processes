@@ -1,0 +1,4 @@
+method,coverage_pct,mean_width,width_std,width_error_corr,notes
+Split Conformal,93.23467230443974,0.47181968388366696,5.551115123125783e-17,,Winner — robust to distribution shift
+CQR (adaptive),73.57293868921776,0.5980287734690253,0.09112473192648998,-0.18705869329482203,Anti-correlated with error; lower-quantile cannot extrapolate
+Residual-Normalized,75.47568710359408,3220630657.88406,48589289672.956024,-6.771272829281044e-05,Numerical instability; residual estimator predicts near-zero σ

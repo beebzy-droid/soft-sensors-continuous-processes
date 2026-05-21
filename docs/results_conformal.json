@@ -1,0 +1,27 @@
+{
+  "winner": "Split Conformal",
+  "split": {
+    "train_pct": 0.6,
+    "calibration_pct": 0.2,
+    "test_pct": 0.2
+  },
+  "split_conformal": {
+    "empirical_coverage": 0.9323467230443975,
+    "nominal_coverage": 0.95,
+    "mean_width": 0.47181968388366696,
+    "n_failures": 32
+  },
+  "cqr_adaptive": {
+    "empirical_coverage": 0.7357293868921776,
+    "mean_width": 0.5980287734690253,
+    "width_error_correlation": -0.18705869329482203,
+    "verdict": "Anti-correlated with error; not deployable"
+  },
+  "residual_normalized": {
+    "empirical_coverage": 0.7547568710359408,
+    "mean_width": 3220630657.88406,
+    "verdict": "Numerical instability; not deployable"
+  },
+  "underlying_model": "XGBoost on 77 features (lags up to 30)",
+  "xgb_test_r2_on_this_split": 0.46451736546467903
+}
