@@ -1,0 +1,25 @@
+{
+  "case_study": "Fermentation (custom simulator)",
+  "n_batches": 40,
+  "split_strategy": "batch-level (24/8/8)",
+  "n_features": 37,
+  "pls": {
+    "n_components": 11,
+    "test_rmse_gL": 0.5994479206607592,
+    "test_r2": 0.950200167620299
+  },
+  "xgboost": {
+    "hyperparameters": {
+      "max_depth": 3,
+      "learning_rate": 0.03,
+      "subsample": 0.7,
+      "min_child_weight": 5,
+      "n_estimators": 178
+    },
+    "cv_mean_rmse_gL": 0.3830375231997592,
+    "cv_std_rmse_gL": 0.059082692995746575,
+    "test_rmse_gL": 0.49645009886817887,
+    "test_mae_gL": 0.3209355971091165,
+    "test_r2": 0.9658432793498177
+  }
+}

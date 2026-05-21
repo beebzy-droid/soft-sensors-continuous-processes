@@ -1,0 +1,3 @@
+case_study,process_type,n_samples,n_features,split_strategy,pls_test_r2,xgb_test_r2,xgb_minus_pls_r2,conformal_coverage,conformal_width,width_units
+Debutanizer (petrochemical),Continuous distillation,2364,77,Chronological 60/20/20,0.154,0.519,0.365,0.932,0.472,"normalized [0,1]"
+Fermentation (food/beverage),Fed-batch fermentation,14760,37,Batch-level 24/8/8,0.950200167620299,0.9658432793498177,0.01564311172951871,0.8861788617886179,1.6383103044485723,g/L

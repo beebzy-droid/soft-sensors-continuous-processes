@@ -1,0 +1,57 @@
+{
+  "case_study": "Fermentation",
+  "method": "Split Conformal",
+  "nominal_coverage": 0.95,
+  "empirical_coverage_marginal": 0.8861788617886179,
+  "mean_interval_width_gL": 1.6383103044485723,
+  "per_batch_coverage": [
+    {
+      "batch_id": 33,
+      "coverage": 0.9105691056910569,
+      "n_samples": 369,
+      "final_y": 10.976024668818013
+    },
+    {
+      "batch_id": 34,
+      "coverage": 0.8997289972899729,
+      "n_samples": 369,
+      "final_y": 5.826747058605716
+    },
+    {
+      "batch_id": 35,
+      "coverage": 0.989159891598916,
+      "n_samples": 369,
+      "final_y": 6.807903562302145
+    },
+    {
+      "batch_id": 36,
+      "coverage": 0.975609756097561,
+      "n_samples": 369,
+      "final_y": 8.353977401759547
+    },
+    {
+      "batch_id": 37,
+      "coverage": 0.7289972899728997,
+      "n_samples": 369,
+      "final_y": 9.534430802290615
+    },
+    {
+      "batch_id": 38,
+      "coverage": 0.9728997289972899,
+      "n_samples": 369,
+      "final_y": 7.109147241334558
+    },
+    {
+      "batch_id": 39,
+      "coverage": 0.6504065040650406,
+      "n_samples": 369,
+      "final_y": 9.520972531676469
+    },
+    {
+      "batch_id": 40,
+      "coverage": 0.962059620596206,
+      "n_samples": 369,
+      "final_y": 5.553904994980942
+    }
+  ]
+}
