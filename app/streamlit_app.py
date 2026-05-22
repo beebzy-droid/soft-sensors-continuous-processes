@@ -71,8 +71,13 @@ TEST_BATCHES = [33, 34, 35, 36, 37, 38, 39, 40]
 # --------------------------------------------------------------------------
 @st.cache_data
 def load_debutanizer_data():
-    """Load the raw Debutanizer dataset for replay in the dashboard."""
-    path = PROJECT_ROOT / "data" / "raw" / "Debutanizer_Data.txt"
+    """Load the raw Debutanizer dataset for replay in the dashboard.
+
+    Looks first in app/data (deployment fixture), then in data/raw (local dev).
+    """
+    bundled_path = PROJECT_ROOT / "app" / "data" / "Debutanizer_Data.txt"
+    local_path = PROJECT_ROOT / "data" / "raw" / "Debutanizer_Data.txt"
+    path = bundled_path if bundled_path.exists() else local_path
     df = pd.read_csv(path, sep=r"\s+")
     return df
 
@@ -95,37 +100,87 @@ def load_fermentation_data():
 # --------------------------------------------------------------------------
 # API call wrappers
 # --------------------------------------------------------------------------
-def call_debutanizer_api(history_dict):
-    """POST to the Debutanizer endpoint. Returns response JSON or raises."""
-    response = requests.post(
-        f"{API_BASE_URL}/predict/debutanizer",
-        json={"history": history_dict},
-        timeout=10,
+# --------------------------------------------------------------------------
+# Prediction wrappers — work in both API mode (default, calls HTTP) and
+# direct mode (used on Hugging Face Spaces, calls inference functions in-process)
+# --------------------------------------------------------------------------
+# Default: HTTP/API mode for local dev.
+# When running on Hugging Face Spaces, force direct mode.
+if os.environ.get("SPACE_ID"):
+    MODE = "direct"
+else:
+    MODE = os.environ.get("SOFTSENSORS_MODE", "api")
+
+if MODE == "direct":
+    # Import the inference layer directly. Models are loaded once when this
+    # module is first imported (we call load_all_models() below).
+    import sys
+
+    sys.path.insert(0, str(PROJECT_ROOT))
+    from src.api.inference import (
+        load_all_models,
+        models_loaded as _models_loaded,
+        predict_debutanizer as _predict_debutanizer,
+        predict_fermentation as _predict_fermentation,
     )
-    response.raise_for_status()
-    return response.json()
+    from src.api.schemas import DebutanizerRequest, FermentationRequest
 
+    # Lazy load — only when first prediction is requested
+    _models_initialized = False
 
-def call_fermentation_api(time_h, history_dict):
-    """POST to the Fermentation endpoint. Returns response JSON or raises."""
-    response = requests.post(
-        f"{API_BASE_URL}/predict/fermentation",
-        json={"time_h": time_h, "history": history_dict},
-        timeout=10,
-    )
-    response.raise_for_status()
-    return response.json()
+    def _ensure_models_loaded():
+        global _models_initialized
+        if not _models_initialized:
+            load_all_models()
+            _models_initialized = True
 
+    def call_debutanizer_api(history_dict):
+        _ensure_models_loaded()
+        req = DebutanizerRequest(history=history_dict)
+        return _predict_debutanizer(req).model_dump()
 
-def check_api_health():
-    """GET /health. Returns dict or None on failure."""
-    try:
-        r = requests.get(f"{API_BASE_URL}/health", timeout=2)
-        if r.status_code == 200:
-            return r.json()
-    except Exception:
-        pass
-    return None
+    def call_fermentation_api(time_h, history_dict):
+        _ensure_models_loaded()
+        req = FermentationRequest(time_h=time_h, history=history_dict)
+        return _predict_fermentation(req).model_dump()
+
+    def check_api_health():
+        _ensure_models_loaded()
+        loaded = _models_loaded()
+        return {
+            "status": "ok" if all(loaded.values()) else "degraded",
+            "api_version": "direct-mode",
+            "models_loaded": loaded,
+        }
+
+else:
+    # HTTP mode (default) — for local development with a running FastAPI server
+    def call_debutanizer_api(history_dict):
+        response = requests.post(
+            f"{API_BASE_URL}/predict/debutanizer",
+            json={"history": history_dict},
+            timeout=10,
+        )
+        response.raise_for_status()
+        return response.json()
+
+    def call_fermentation_api(time_h, history_dict):
+        response = requests.post(
+            f"{API_BASE_URL}/predict/fermentation",
+            json={"time_h": time_h, "history": history_dict},
+            timeout=10,
+        )
+        response.raise_for_status()
+        return response.json()
+
+    def check_api_health():
+        try:
+            r = requests.get(f"{API_BASE_URL}/health", timeout=2)
+            if r.status_code == 200:
+                return r.json()
+        except Exception:
+            pass
+        return None
 
 
 # --------------------------------------------------------------------------
@@ -138,11 +193,17 @@ with st.sidebar:
         "*Powered by XGBoost + Conformal Prediction.*"
     )
     st.divider()
-    st.caption(f"API endpoint: `{API_BASE_URL}`")
+
+    if MODE == "direct":
+        st.caption("Mode: direct (in-process)")
+    else:
+        st.caption(f"Mode: HTTP via `{API_BASE_URL}`")
 
     health = check_api_health()
     if health and health.get("status") == "ok":
-        st.success("API: online")
+        st.success("Models loaded")
+    elif health and health.get("status") == "degraded":
+        st.warning("Some models failed to load")
     else:
         st.error("API: offline — start the FastAPI server")
 

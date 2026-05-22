@@ -26,3 +26,7 @@ Thumbs.db
 # Secrets
 .env
 *.key
+
+# but DO commit the deployment fixtures
+!app/data/
+!app/data/Debutanizer_Data.txt
