@@ -14,7 +14,7 @@ A dual case study in **calibrated industrial soft sensors**, covering a petroche
 | 4 | Fermentation simulator + EDA | ✅ |
 | 5 | Fermentation modeling + cross-case findings | ✅ |
 | 6 | FastAPI inference service + tests | ✅ |
-| 7 | Streamlit dashboard | ⏳ |
+| 7 | Streamlit dashboard | ✅ |
 | 8 | Deployment to Hugging Face Spaces | ⏳ |
 | 9 | Technical write-up | ⏳ |
 | 10 | Polish & outreach | ⏳ |
@@ -72,6 +72,12 @@ Run the tests:
 
 ```bash
 pytest tests/ -v
+```
+
+Run the dashboard (FastAPI must be running):
+
+```bash
+streamlit run app/streamlit_app.py
 ```
 
 ## Datasets
