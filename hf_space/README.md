@@ -8,7 +8,7 @@ sdk_version: 1.57.0
 app_file: app.py
 pinned: false
 license: mit
-short_description: Calibrated industrial soft sensors with 95% conformal intervals
+short_description: Calibrated industrial soft sensors with conformal bounds
 ---
 
 # Soft Sensors for Continuous Processes
