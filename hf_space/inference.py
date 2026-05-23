@@ -47,6 +47,18 @@ _models: dict = {}
 def load_all_models() -> dict:
     """Load every trained artifact from disk. Returns dict[name -> bool]."""
     results = {}
+
+    # Debug: print what's actually in the models directory
+    print(f"[debug] MODELS_DIR: {MODELS_DIR}")
+    print(f"[debug] MODELS_DIR exists: {MODELS_DIR.exists()}")
+    if MODELS_DIR.exists():
+        for f in MODELS_DIR.iterdir():
+            print(f"[debug]   {f.name}: {f.stat().st_size} bytes")
+            # Read first 100 bytes to see if it's a real binary or a pointer
+            with open(f, "rb") as fh:
+                head = fh.read(100)
+            print(f"[debug]     first 100 bytes: {head[:50]!r}...")
+
     try:
         _models["debutanizer_xgb"] = joblib.load(
             MODELS_DIR / "xgb_lagged_extended.joblib"
@@ -59,7 +71,10 @@ def load_all_models() -> dict:
         )
         results["debutanizer"] = True
     except Exception as e:
-        print(f"[warn] Failed to load debutanizer artifacts: {e}")
+        print(f"[warn] Failed to load debutanizer artifacts: {type(e).__name__}: {e}")
+        import traceback
+
+        traceback.print_exc()
         results["debutanizer"] = False
 
     try:
@@ -74,7 +89,10 @@ def load_all_models() -> dict:
         )
         results["fermentation"] = True
     except Exception as e:
-        print(f"[warn] Failed to load fermentation artifacts: {e}")
+        print(f"[warn] Failed to load fermentation artifacts: {type(e).__name__}: {e}")
+        import traceback
+
+        traceback.print_exc()
         results["fermentation"] = False
 
     return results
