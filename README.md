@@ -10,13 +10,139 @@ pinned: false
 license: mit
 ---
 
-# Soft Sensors for Continuous Processes
+# 🏭 Soft Sensors for Continuous Processes
 
-A dual case study in **calibrated industrial soft sensors**, covering a petrochemical distillation column and a pharmaceutical/F&B fermentation process.
+A dual case study in **calibrated industrial soft sensors** — predicting hard-to-measure process variables in real time, with calibrated 95% uncertainty intervals, across two industries: petrochemical distillation and pharmaceutical fermentation.
 
-## Status
+## 🎯 Project Overview
 
-🚧 **In progress** — see [project plan](./PROJECT_PLAN.md) for the 10-week roadmap.
+Soft sensors estimate process variables that are slow, expensive, or impossible to measure directly (e.g., a gas chromatograph that takes 45 minutes; an HPLC assay that takes hours), using cheap online sensors (temperatures, flows, pressures) that are sampled continuously.
+
+This project builds production-grade soft sensors for two distinct continuous processes — a debutanizer column and a fed-batch fermentation — and compares their model performance, failure modes, and uncertainty calibration behavior. Same pipeline, two industries, one unified comparison.
+
+## 📊 Live Demo
+
+🔗 **[Try it now: beebzy-droid-soft-sensors.hf.space](https://beebzy-droid-soft-sensors.hf.space/)**
+
+Interactive Streamlit dashboard hosted on Hugging Face Spaces. Both case studies live, with calibrated 95% intervals and what-if sliders for operator-relevant inputs.
+
+## 🛠️ Tech Stack
+
+| Layer | Tool |
+| --- | --- |
+| Modeling | scikit-learn (PLS), XGBoost |
+| Uncertainty Quantification | MAPIE (split conformal, CQR, residual-normalized) |
+| Interpretability | SHAP |
+| Process Simulation | Custom Monod + Luedeking-Piret kinetics (NumPy/SciPy) |
+| API | FastAPI + Pydantic |
+| Dashboard | Streamlit + Altair |
+| Testing | pytest |
+| Deployment | Hugging Face Spaces (Streamlit SDK) |
+| Version Control | Git & GitHub (with Git LFS for model artifacts) |
+
+## 📈 Key Results
+
+| Case Study | Process | PLS R² | XGBoost R² | Conformal Coverage |
+|------------|---------|-------:|-----------:|-------------------:|
+| **Debutanizer** (petrochem) | Continuous distillation | 0.15 | **0.52** | 93.2% (target 95%) |
+| **Fermentation** (F&B) | Fed-batch bioreactor | 0.95 | **0.97** | 88.6% (target 95%) |
+
+- **2 case studies**, two industries, one unified ML pipeline
+- **+0.37 R² lift** from XGBoost over PLS on the Debutanizer (where lagged transport dynamics matter)
+- **R² 0.95 PLS baseline** on Fermentation (where `time_h` carries most of the signal)
+- **12 pytest tests** covering the FastAPI service, all passing
+- **8.3 MB of model artifacts** deployed via Git LFS
+
+## 🔍 Key Findings
+
+1. **Same pipeline, two industries, same uncertainty failure mode.** Split conformal achieved approximate marginal coverage on both case studies but failed conditional coverage in regimes systematically harder than the calibration distribution. For industrial deployment, conformal intervals must be complemented with runtime drift detection.
+
+2. **Data-driven discovery of process physics.** SHAP attribution rediscovered known engineering principles in both case studies: mid-column tray temperature with transport delay drives debutanizer bottoms composition; cumulative metabolized substrate (lagged reactor volume) drives penicillin production.
+
+3. **Adaptive conformal methods underperformed constant-width split conformal on the Debutanizer.** CQR's interval width was anti-correlated (r = −0.19) with model error: the bands were tightest in exactly the regions where the model was most wrong, because the quantile sub-models could not extrapolate.
+
+4. **Linear baseline performance differs by 6× across industries.** Fermentation PLS R² = 0.95 vs Debutanizer PLS R² = 0.15. The role of nonlinear models shifts accordingly: unlocking previously-unreachable performance on the Debutanizer vs refining an already-strong baseline on the fermentation.
+
+## 📸 Screenshots
+
+### Cross-Case Comparison
+
+![Cross-case summary](docs/figures/cross_case_summary.png)
+
+### Conformal Three-Method Comparison (Debutanizer)
+
+![Conformal comparison](docs/figures/conformal_three_method_comparison.png)
+
+### Fermentation Per-Batch Coverage
+
+![Per-batch coverage](docs/figures/fermentation_conformal_per_batch.png)
+
+### Fermentation SHAP — Sensor & Lag Importance
+
+![SHAP fermentation](docs/figures/indpensim_shap_sensor_lag.png)
+
+## 📁 Project Structure
+
+```
+soft-sensors-continuous-processes/
+├── src/
+│   ├── api/                   → FastAPI inference service
+│   │   ├── config.py          → Artifact paths and constants
+│   │   ├── schemas.py         → Pydantic request/response models
+│   │   ├── inference.py       → Feature engineering + prediction
+│   │   └── main.py            → FastAPI app + endpoints
+│   ├── simulator/             → Custom fermentation simulator
+│   └── models/                → Trained .joblib artifacts (LFS-tracked)
+├── notebooks/
+│   ├── 01_debutanizer_eda.ipynb
+│   ├── 02_debutanizer_modeling.ipynb
+│   ├── 03_debutanizer_conformal.ipynb
+│   ├── 04_indpensim_eda.ipynb
+│   └── 05_indpensim_modeling.ipynb
+├── app/
+│   ├── streamlit_app.py       → Dashboard (dual-mode: HTTP or in-process)
+│   └── data/                  → Deployment fixtures
+├── tests/                     → pytest integration tests
+├── docs/                      → Result JSONs, comparison tables, figures
+├── requirements.txt           → Pinned dependency tree
+└── README.md
+```
+
+## 🚀 How to Run
+
+### 1. Clone and set up environment
+
+```bash
+git clone https://github.com/beebzy-droid/soft-sensors-continuous-processes.git
+cd soft-sensors-continuous-processes
+conda create -n softsensors python=3.11 -y
+conda activate softsensors
+pip install -r requirements.txt
+```
+
+### 2. Run the API
+
+```bash
+uvicorn src.api.main:app --port 8000
+```
+
+Interactive Swagger UI at `http://localhost:8000/docs`.
+
+### 3. Run the dashboard (in a separate terminal)
+
+```bash
+streamlit run app/streamlit_app.py
+```
+
+Opens at `http://localhost:8501`.
+
+### 4. Run the tests
+
+```bash
+pytest tests/ -v
+```
+
+## 🚧 Project Status
 
 | Week | Milestone | Status |
 |------|-----------|--------|
@@ -27,83 +153,22 @@ A dual case study in **calibrated industrial soft sensors**, covering a petroche
 | 5 | Fermentation modeling + cross-case findings | ✅ |
 | 6 | FastAPI inference service + tests | ✅ |
 | 7 | Streamlit dashboard | ✅ |
-| 8 | Deployment to Hugging Face Spaces | ⏳ |
+| 8 | Deployment to Hugging Face Spaces | ✅ |
 | 9 | Technical write-up | ⏳ |
 | 10 | Polish & outreach | ⏳ |
 
-## Headline results
+## 📚 Datasets
 
-| Case Study | Process | PLS R² | XGBoost R² | Conformal Coverage |
-|------------|---------|-------:|-----------:|-------------------:|
-| Debutanizer (petrochem) | Continuous distillation | 0.15 | **0.52** | 93.2% (target 95%) |
-| Fermentation (F&B) | Fed-batch bioreactor | 0.95 | **0.97** | 88.6% (target 95%) |
+- **Debutanizer column** — Fortuna et al. (2007), available via [softsensors/soft-sensor-data](https://github.com/softsensors/soft-sensor-data). 2,394 samples, 7 inputs.
+- **Fermentation** — Custom Monod + Luedeking-Piret simulator inspired by IndPenSim (Goldrick et al. 2015, 2019). 40 batches × 401 samples, fully reproducible from `seed=42` via `src/simulator/fermentation.py`. The canonical IndPenSim dataset is available at [Mendeley Data](https://data.mendeley.com/datasets/pdnjz7zz5x/2); our methodology applies directly to it.
 
-![Cross-case comparison](docs/figures/cross_case_summary.png)
-
-## Key findings
-
-1. **Same pipeline, two industries, different headline numbers — same uncertainty failure mode.** Split conformal achieved approximate marginal coverage on both case studies but failed conditional coverage in regimes systematically harder than the calibration distribution. For industrial deployment, conformal intervals must be complemented with runtime drift detection.
-2. **Data-driven discovery of process physics.** SHAP attribution rediscovered known engineering principles in both case studies: mid-column tray temperature with transport delay drives debutanizer bottoms composition; cumulative metabolized substrate (lagged reactor volume) drives penicillin production.
-3. **Adaptive conformal methods (CQR, residual-normalized) underperformed constant-width split conformal on the Debutanizer.** CQR's interval width was anti-correlated (r = −0.19) with model error: the bands were tightest in exactly the regions where the model was most wrong, because the quantile sub-models could not extrapolate.
-
-## Repository structure
-
-```
-src/
-├── api/           FastAPI inference service
-├── simulator/     Custom fermentation simulator (Monod + Luedeking-Piret)
-└── models/        Trained XGBoost + conformal artifacts (.joblib)
-
-notebooks/
-├── 01_debutanizer_eda.ipynb
-├── 02_debutanizer_modeling.ipynb
-├── 03_debutanizer_conformal.ipynb
-├── 04_indpensim_eda.ipynb
-└── 05_indpensim_modeling.ipynb
-
-tests/             pytest integration tests for the API
-docs/              Result JSONs, comparison tables, figures
-```
-
-## Local setup
-
-```bash
-conda create -n softsensors python=3.11 -y
-conda activate softsensors
-pip install -r requirements.txt   # to be added in week 10
-```
-
-Run the API:
-
-```bash
-uvicorn src.api.main:app --reload --port 8000
-# Then open http://localhost:8000/docs for the interactive Swagger UI
-```
-
-Run the tests:
-
-```bash
-pytest tests/ -v
-```
-
-Run the dashboard (FastAPI must be running):
-
-```bash
-streamlit run app/streamlit_app.py
-```
-
-## Datasets
-
-- **Debutanizer column** — Fortuna et al. (2007), included via [softsensors/soft-sensor-data](https://github.com/softsensors/soft-sensor-data). 2,394 samples, 7 inputs.
-- **Fermentation** — Custom Monod + Luedeking-Piret simulator, inspired by IndPenSim (Goldrick et al. 2015, 2019). 40 batches × 401 samples, fully reproducible from `seed=42` via `src/simulator/fermentation.py`. The canonical IndPenSim dataset is available at [Mendeley Data](https://data.mendeley.com/datasets/pdnjz7zz5x/2); our methodology applies directly to it.
-
-## Future work
+## 🔮 Future Work
 
 - Containerization (Dockerfile) for one-command deployment
 - Stress-test campaign with higher-disturbance fermentation simulator
 - Runtime drift detection to complement static conformal intervals
 - LSTM/Transformer sequence models as a comparison to XGBoost
 
-## License
+## 📄 License
 
 MIT
