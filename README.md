@@ -1,15 +1,3 @@
----
-title: Soft Sensors for Continuous Processes
-emoji: 🏭
-colorFrom: blue
-colorTo: red
-sdk: streamlit
-sdk_version: 1.57.0
-app_file: app/streamlit_app.py
-pinned: false
-license: mit
----
-
 # 🏭 Soft Sensors for Continuous Processes
 
 A dual case study in **calibrated industrial soft sensors** — predicting hard-to-measure process variables in real time, with calibrated 95% uncertainty intervals, across two industries: petrochemical distillation and pharmaceutical fermentation.
